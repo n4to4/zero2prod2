@@ -1,5 +1,3 @@
-use actix_web::web::Data;
-
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
