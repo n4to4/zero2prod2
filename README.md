@@ -5,3 +5,8 @@
 ```
 cargo install --version=0.6.0 sqlx-cli --no-default-features --features postgres
 ```
+
+```
+export DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/newsletter
+sqlx migrate (create|add|run)
+```
