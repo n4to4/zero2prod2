@@ -10,4 +10,7 @@ cargo install --version=0.6.0 sqlx-cli --no-default-features --features postgres
 export DATABASE_URL=postgres://postgres:password@127.0.0.1:5432/newsletter
 sqlx database create
 sqlx migrate (add|run)
+
+5.3.3 Sqlx Offline Mode
+cargo sqlx prepare -- --lib
 ```
