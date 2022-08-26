@@ -5,7 +5,6 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub struct FormData {
     name: String,
     email: String,
