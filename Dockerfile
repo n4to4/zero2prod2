@@ -6,7 +6,7 @@ COPY . .
 ENV SQLX_OFFLINE true
 RUN cargo build --release
 
-FROM rust:latest AS runtime
+FROM rust:slim AS runtime
 
 WORKDIR /app
 COPY --from=builder /app/target/release/zero2prod zero2prod
