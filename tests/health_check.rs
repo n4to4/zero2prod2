@@ -162,7 +162,7 @@ async fn subscribe_returns_a_200_when_fields_are_present_but_empty() {
         // Act
         let response = client
             .post(&format!("{}/subscriptions", &app.address))
-            .header("", "")
+            .header("Content-Type", "application/x-www-form-urlencoded")
             .body(body)
             .send()
             .await
