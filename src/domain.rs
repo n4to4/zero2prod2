@@ -8,7 +8,7 @@ pub struct NewSubscriber {
 pub struct SubscriberName(String);
 
 impl SubscriberName {
-    pub fn parse(s: String) -> Self {
+    pub fn parse(s: String) -> Result<Self, String> {
         let is_empty_or_whitespace = s.trim().is_empty();
 
         let is_too_long = s.graphemes(true).count() > 256;
@@ -19,7 +19,7 @@ impl SubscriberName {
         if is_empty_or_whitespace || is_too_long || contains_forbidden_characters {
             panic!("{s} is not a valid subscriber name.");
         } else {
-            SubscriberName(s)
+            Ok(SubscriberName(s))
         }
     }
 }
