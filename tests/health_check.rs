@@ -142,7 +142,6 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
 }
 
 #[tokio::test]
-#[ignore]
 async fn subscribe_returns_a_400_when_fields_are_present_but_empty() {
     // Arrange
     let app = spawn_app().await;
