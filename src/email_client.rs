@@ -32,11 +32,11 @@ impl EmailClient {
     ) -> Result<(), reqwest::Error> {
         let url = format!("{}/email", self.base_url);
         let request_body = SendEmailRequest {
-            from: self.sender.as_ref().to_owned(),
-            to: recipient.as_ref().to_owned(),
-            subject: subject.to_owned(),
-            html_body: html_content.to_owned(),
-            text_body: text_content.to_owned(),
+            from: self.sender.as_ref(),
+            to: recipient.as_ref(),
+            subject,
+            html_body: html_content,
+            text_body: text_content,
         };
         self.http_client
             .post(&url)
@@ -53,12 +53,12 @@ impl EmailClient {
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "PascalCase")]
-struct SendEmailRequest {
-    from: String,
-    to: String,
-    subject: String,
-    html_body: String,
-    text_body: String,
+struct SendEmailRequest<'a> {
+    from: &'a str,
+    to: &'a str,
+    subject: &'a str,
+    html_body: &'a str,
+    text_body: &'a str,
 }
 
 #[cfg(test)]
@@ -89,7 +89,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn send_email_fires_a_request_to_base_url() {
+    async fn send_email_sends_the_expected_request() {
         // Arrange
         let mock_server = MockServer::start().await;
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
