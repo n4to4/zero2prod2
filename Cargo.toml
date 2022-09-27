@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.1.0"
+anyhow = "1.0.65"
 chrono = "0.4.22"
 config = "0.13.2"
 rand = { version = "0.8" }
