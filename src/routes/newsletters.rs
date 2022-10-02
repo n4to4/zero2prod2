@@ -77,12 +77,7 @@ pub async fn publish_newsletter(
 async fn get_confirmed_subscribers(
     pool: &PgPool,
 ) -> anyhow::Result<Vec<anyhow::Result<ConfirmedSubscriber>>> {
-    struct Row {
-        email: String,
-    }
-
-    let rows = sqlx::query_as!(
-        Row,
+    let rows = sqlx::query!(
         r#"
         select email
         from subscriptions
