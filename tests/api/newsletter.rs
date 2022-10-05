@@ -15,7 +15,6 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
         .await;
 
     // Act
-
     let newsletter_request_body = serde_json::json!({
         "title": "Newsletter title",
         "content": {
