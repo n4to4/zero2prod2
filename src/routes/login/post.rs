@@ -1,5 +1,6 @@
 use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::routes::error_chain_fmt;
+use actix_web::error::InternalError;
 use actix_web::http::header::LOCATION;
 use actix_web::{web, HttpResponse};
 use hmac::{Hmac, Mac};
@@ -34,7 +35,7 @@ pub async fn login(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
     secret: web::Data<Secret<String>>,
-) -> HttpResponse {
+) -> Result<HttpResponse, InternalError<LoginError>> {
     let credentials = Credentials {
         username: form.0.username,
         password: form.0.password,
@@ -43,9 +44,9 @@ pub async fn login(
     match validate_credentials(credentials, &pool).await {
         Ok(user_id) => {
             tracing::Span::current().record("user_id", &tracing::field::display(&user_id));
-            HttpResponse::SeeOther()
+            Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, "/"))
-                .finish()
+                .finish())
         }
         Err(e) => {
             let e = match e {
@@ -60,12 +61,13 @@ pub async fn login(
                 mac.update(query_string.as_bytes());
                 mac.finalize().into_bytes()
             };
-            HttpResponse::SeeOther()
+            let response = HttpResponse::SeeOther()
                 .insert_header((
                     LOCATION,
                     format!("/login?{}&tag={:x}", query_string, hmac_tag),
                 ))
-                .finish()
+                .finish();
+            Err(InternalError::from_response(e, response))
         }
     }
 }
