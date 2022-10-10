@@ -2,6 +2,7 @@ use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::routes::error_chain_fmt;
 use actix_web::http::{header::LOCATION, StatusCode};
 use actix_web::{web, HttpResponse, ResponseError};
+use hmac::{Hmac, Mac};
 use secrecy::Secret;
 use sqlx::PgPool;
 
@@ -21,9 +22,15 @@ impl std::fmt::Debug for LoginError {
 
 impl ResponseError for LoginError {
     fn error_response(&self) -> HttpResponse {
-        let encoded_error = urlencoding::Encoded::new(self.to_string());
+        let query_string = format!("error={}", urlencoding::Encoded::new(self.to_string()));
+        let secret: &[u8] = todo!();
+        let hmac_tag = {
+            let mut mac = Hmac::<sha2::Sha256>::new_from_slice(secret).unwrap();
+            mac.update(query_string.as_bytes());
+            mac.finalize().into_bytes()
+        };
         HttpResponse::build(self.status_code())
-            .insert_header((LOCATION, format!("/login?error={encoded_error}")))
+            .insert_header((LOCATION, format!("/login?{query_string}&tag={hmac_tag:x}")))
             .finish()
     }
 
