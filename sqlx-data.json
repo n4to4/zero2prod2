@@ -1,5 +1,31 @@
 {
   "db": "PostgreSQL",
+  "057ec5f10d26e79ea65539633899cdc8ce6992ce48c8938037412f6bbc4a563d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        select user_id, password_hash\n        from users\n        where username = $1\n        "
+  },
   "2f7682d2c03877302a00ffd05380fba6d87be17c31c029054a25ad7437c82425": {
     "describe": {
       "columns": [],
@@ -59,5 +85,43 @@
       }
     },
     "query": "\n        insert into subscriptions (id, email, name, subscribed_at, status)\n        values ($1, $2, $3, $4, 'pending_confirmation')\n        "
+  },
+  "714f501da476c468bf8fa63a5093ab9d52df92743421df2fee8563b7a1941c29": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        select username\n        from users\n        where user_id = $1\n        "
+  },
+  "f2b2b23bf31b18525e89b3492179d205c76dedfb059458e5ea95dc538d447c51": {
+    "describe": {
+      "columns": [
+        {
+          "name": "email",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        select email\n        from subscriptions\n        where status = 'confirmed'\n        "
   }
 }
