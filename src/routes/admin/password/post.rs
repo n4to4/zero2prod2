@@ -1,7 +1,7 @@
 use crate::session_state::TypedSession;
 use crate::utils::{e500, see_other};
 use actix_web::{web, HttpResponse};
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -17,5 +17,8 @@ pub async fn change_password(
     if session.get_user_id().map_err(e500)?.is_none() {
         return Ok(see_other("/login"));
     };
+    if form.new_password.expose_secret() != form.new_password_check.expose_secret() {
+        return Ok(see_other("/admin/password"));
+    }
     todo!()
 }
