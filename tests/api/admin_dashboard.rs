@@ -38,6 +38,6 @@ async fn logout_clears_session_state() {
     assert!(html_page.contains(r#"<p><i>You have successfully logged out.</i><p>"#));
 
     // Act - Part 5 - Attempt to load admin panel
-    let html_page = app.get_admin_dashboard_html().await;
+    let response = app.get_admin_dashboard().await;
     assert_is_redirect_to(&response, "/login");
 }
