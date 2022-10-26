@@ -106,6 +106,19 @@
     },
     "query": "\n        select username\n        from users\n        where user_id = $1\n        "
   },
+  "795dcce308e8868284672c2d9c62a04ef7c7456a99dbfd2514ba3e1d347aa703": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        update users\n        set password_hash = $1\n        where user_id = $2\n        "
+  },
   "f2b2b23bf31b18525e89b3492179d205c76dedfb059458e5ea95dc538d447c51": {
     "describe": {
       "columns": [
