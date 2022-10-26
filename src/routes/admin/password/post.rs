@@ -20,10 +20,10 @@ pub async fn change_password(
     pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let user_id = session.get_user_id().map_err(e500)?;
-    if user_id.is_none() {
-        return Ok(see_other("/login"));
+    let user_id = match user_id {
+        Some(id) => id,
+        None => return Ok(see_other("/login")),
     };
-    let user_id = user_id.unwrap();
 
     if form.new_password.expose_secret() != form.new_password_check.expose_secret() {
         FlashMessage::error(
@@ -46,5 +46,9 @@ pub async fn change_password(
             AuthError::UnexpectedError(_) => Err(e500(e)),
         };
     }
-    todo!()
+    crate::authentication::change_password(user_id, form.0.new_password, &pool)
+        .await
+        .map_err(e500)?;
+    FlashMessage::error("Your password has been changed.").send();
+    Ok(see_other("/admin/password"))
 }
