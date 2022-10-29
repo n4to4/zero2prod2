@@ -223,3 +223,16 @@ async fn you_must_be_logged_in_to_submit_a_new_issue() {
     // Assert
     assert_is_redirect_to(&response, "/login");
 }
+
+#[tokio::test]
+async fn can_get_admin_newsletters() {
+    // Arrange
+    let app = spawn_app().await;
+    app.login().await;
+
+    // Act
+    let html_page = app.get_admin_newsletters_html().await;
+
+    // Assert
+    assert!(html_page.contains("Submit new issue"));
+}

@@ -225,6 +225,18 @@ impl TestApp {
             .await
             .expect("Failed to execute request.")
     }
+
+    pub async fn get_admin_newsletters_html(&self) -> String {
+        self.get_admin_newsletters().await.text().await.unwrap()
+    }
+
+    pub async fn login(&self) {
+        self.post_login(&serde_json::json!({
+            "username": &self.test_user.username,
+            "password": &self.test_user.password,
+        }))
+        .await;
+    }
 }
 
 impl TestUser {
