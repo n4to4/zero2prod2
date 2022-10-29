@@ -209,3 +209,17 @@ async fn create_confirmed_subscriber(app: &TestApp) {
         .error_for_status()
         .unwrap();
 }
+
+// ---
+
+#[tokio::test]
+async fn get_admin_newsletters() {
+    // Arrange
+    let app = spawn_app().await;
+
+    // Act
+    let html_page = app.get_admin_newsletters_html().await;
+
+    // Assert
+    assert!(html_page.contains("You can submit a new newsletter issue here"));
+}
