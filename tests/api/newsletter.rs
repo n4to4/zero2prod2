@@ -1,4 +1,4 @@
-use crate::helpers::{spawn_app, ConfirmationLinks, TestApp};
+use crate::helpers::{assert_is_redirect_to, spawn_app, ConfirmationLinks, TestApp};
 use uuid::Uuid;
 use wiremock::matchers::{any, method, path};
 use wiremock::{Mock, ResponseTemplate};
@@ -213,13 +213,13 @@ async fn create_confirmed_subscriber(app: &TestApp) {
 // ---
 
 #[tokio::test]
-async fn get_admin_newsletters() {
+async fn you_must_be_logged_in_to_submit_a_new_issue() {
     // Arrange
     let app = spawn_app().await;
 
     // Act
-    let html_page = app.get_admin_newsletters_html().await;
+    let response = app.get_admin_newsletters().await;
 
     // Assert
-    assert!(html_page.contains("You can submit a new newsletter issue here"));
+    assert_is_redirect_to(&response, "/login");
 }
