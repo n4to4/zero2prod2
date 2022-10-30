@@ -51,8 +51,8 @@ pub struct Content {
     text: String,
 }
 
-struct ConfirmedSubscriber {
-    email: SubscriberEmail,
+pub struct ConfirmedSubscriber {
+    pub email: SubscriberEmail,
 }
 
 #[tracing::instrument(
@@ -104,7 +104,7 @@ pub async fn publish_newsletter(
 }
 
 #[tracing::instrument(name = "Get confirmed subscribers", skip(pool))]
-async fn get_confirmed_subscribers(
+pub async fn get_confirmed_subscribers(
     pool: &PgPool,
 ) -> anyhow::Result<Vec<anyhow::Result<ConfirmedSubscriber>>> {
     let rows = sqlx::query!(

@@ -236,3 +236,32 @@ async fn can_get_admin_newsletters() {
     // Assert
     assert!(html_page.contains("Submit new issue"));
 }
+
+/*
+#[tokio::test]
+async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
+    // Arrange
+    let app = spawn_app().await;
+    create_confirmed_subscriber(&app).await;
+
+    Mock::given(path("/email"))
+        .and(method("POST"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
+
+    // Act
+    let newsletter_request_body = serde_json::json!({
+        "title": "Newsletter title",
+        "content": {
+            "text":"Newsletter body as plain text",
+            "html": "<p>Newsletter body as HTML</p>",
+        }
+    });
+    let response = app.post_newsletters(newsletter_request_body).await;
+
+    // Assert
+    assert_eq!(response.status().as_u16(), 200);
+}
+*/
