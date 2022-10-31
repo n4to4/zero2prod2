@@ -1,4 +1,5 @@
 use crate::helpers::{assert_is_redirect_to, spawn_app, ConfirmationLinks, TestApp};
+use std::collections::HashMap;
 use uuid::Uuid;
 use wiremock::matchers::{any, method, path};
 use wiremock::{Mock, ResponseTemplate};
@@ -237,11 +238,11 @@ async fn can_get_admin_newsletters() {
     assert!(html_page.contains("Submit new issue"));
 }
 
-/*
 #[tokio::test]
 async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
     // Arrange
     let app = spawn_app().await;
+    app.login().await;
     create_confirmed_subscriber(&app).await;
 
     Mock::given(path("/email"))
@@ -252,16 +253,13 @@ async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
         .await;
 
     // Act
-    let newsletter_request_body = serde_json::json!({
-        "title": "Newsletter title",
-        "content": {
-            "text":"Newsletter body as plain text",
-            "html": "<p>Newsletter body as HTML</p>",
-        }
-    });
-    let response = app.post_newsletters(newsletter_request_body).await;
+    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
+        ("title", "Newsletter title"),
+        ("content_text", "Newsletter body as plain text"),
+        ("content_html", "<p>Newsletter body as HTML</p>"),
+    ]);
+    let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
     assert_eq!(response.status().as_u16(), 200);
 }
-*/

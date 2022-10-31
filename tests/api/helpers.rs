@@ -151,6 +151,15 @@ impl TestApp {
             .expect("Failed to execute request.")
     }
 
+    pub async fn post_newsletters_admin<T: serde::Serialize>(&self, form: &T) -> reqwest::Response {
+        self.api_client
+            .post(&format!("{}/admin/newsletters", &self.address))
+            .form(form)
+            .send()
+            .await
+            .expect("Failed to execute request.")
+    }
+
     pub async fn post_login<Body>(&self, body: &Body) -> reqwest::Response
     where
         Body: serde::Serialize,
