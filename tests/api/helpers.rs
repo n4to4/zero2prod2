@@ -141,16 +141,6 @@ impl TestApp {
         ConfirmationLinks { html, plain_text }
     }
 
-    pub async fn post_newsletters(&self, body: serde_json::Value) -> reqwest::Response {
-        self.api_client
-            .post(&format!("{}/newsletters", &self.address))
-            .basic_auth(&self.test_user.username, Some(&self.test_user.password))
-            .json(&body)
-            .send()
-            .await
-            .expect("Failed to execute request.")
-    }
-
     pub async fn post_newsletters_admin<T: serde::Serialize>(&self, form: &T) -> reqwest::Response {
         self.api_client
             .post(&format!("{}/admin/newsletters", &self.address))
