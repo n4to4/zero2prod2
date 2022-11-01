@@ -8,6 +8,7 @@ use wiremock::{Mock, ResponseTemplate};
 async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     // Arrange
     let app = spawn_app().await;
+    app.login().await;
     create_unconfirmed_subscriber(&app).await;
 
     Mock::given(any())
@@ -17,23 +18,22 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
         .await;
 
     // Act
-    let newsletter_request_body = serde_json::json!({
-        "title": "Newsletter title",
-        "content": {
-            "text": "Newsletter body as plain text",
-            "html": "<p>Newsletter body as HTML</p>",
-        }
-    });
-    let response = app.post_newsletters(newsletter_request_body).await;
+    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
+        ("title", "Newsletter title"),
+        ("content_text", "Newsletter body as plain text"),
+        ("content_html", "<p>Newsletter body as HTML</p>"),
+    ]);
+    let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
     assert_eq!(response.status().as_u16(), 200);
 }
 
 #[tokio::test]
-async fn newsletters_are_delivered_to_confirmed_subscribers() {
+async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
     // Arrange
     let app = spawn_app().await;
+    app.login().await;
     create_confirmed_subscriber(&app).await;
 
     Mock::given(path("/email"))
@@ -44,14 +44,12 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
         .await;
 
     // Act
-    let newsletter_request_body = serde_json::json!({
-        "title": "Newsletter title",
-        "content": {
-            "text":"Newsletter body as plain text",
-            "html": "<p>Newsletter body as HTML</p>",
-        }
-    });
-    let response = app.post_newsletters(newsletter_request_body).await;
+    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
+        ("title", "Newsletter title"),
+        ("content_text", "Newsletter body as plain text"),
+        ("content_html", "<p>Newsletter body as HTML</p>"),
+    ]);
+    let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
     assert_eq!(response.status().as_u16(), 200);
@@ -61,24 +59,23 @@ async fn newsletters_are_delivered_to_confirmed_subscribers() {
 async fn newsletters_returns_400_for_invalid_data() {
     // Arrange
     let app = spawn_app().await;
-    let test_cases = vec![
+    app.login().await;
+    let test_cases: Vec<(HashMap<&str, &str>, &str)> = vec![
         (
-            serde_json::json!({
-                "content": {
-                    "text": "Newsletter body as plain text",
-                    "html": "<p>Newsletter body as HTML</p>",
-                }
-            }),
+            HashMap::from_iter([
+                ("content_text", "Newsletter body as plain text"),
+                ("content_html", "<p>Newsletter body as HTML</p>"),
+            ]),
             "missing title",
         ),
         (
-            serde_json::json!({"title": "Newsletter!"}),
+            HashMap::from_iter([("title", "Newsletter!")]),
             "missing content",
         ),
     ];
 
     for (invalid_body, error_message) in test_cases {
-        let response = app.post_newsletters(invalid_body).await;
+        let response = app.post_newsletters_admin(&invalid_body).await;
 
         // Assert
         assert_eq!(
@@ -95,28 +92,24 @@ async fn requests_missing_authorization_are_rejected() {
     // Arrange
     let app = spawn_app().await;
 
-    let response = reqwest::Client::new()
-        .post(&format!("{}/newsletters", &app.address))
-        .json(&serde_json::json!({
-            "title": "Newsletter title",
-            "content": {
-                "text": "Newsletter body as plain text",
-                "html": "<p>Newsletter body as HTML</p>",
-            }
-        }))
+    let response = app
+        .api_client
+        .post(&format!("{}/admin/newsletters", &app.address))
+        .form(&HashMap::<&str, &str>::from_iter([
+            ("title", "Newsletter title"),
+            ("content_text", "Newsletter body as plain text"),
+            ("content_html", "<p>Newsletter body as HTML</p>"),
+        ]))
         .send()
         .await
         .expect("Failed to execute request.");
 
     // Assert
-    assert_eq!(401, response.status().as_u16());
-    assert_eq!(
-        r#"Basic realm="publish""#,
-        response.headers()["WWW-Authenticate"]
-    );
+    assert_is_redirect_to(&response, "/login");
 }
 
 #[tokio::test]
+#[ignore]
 async fn non_existing_user_is_rejected() {
     // Arrange
     let app = spawn_app().await;
@@ -124,7 +117,8 @@ async fn non_existing_user_is_rejected() {
     let username = Uuid::new_v4().to_string();
     let password = Uuid::new_v4().to_string();
 
-    let response = reqwest::Client::new()
+    let response = app
+        .api_client
         .post(&format!("{}/newsletters", &app.address))
         .basic_auth(username, Some(password))
         .json(&serde_json::json!({
@@ -147,6 +141,7 @@ async fn non_existing_user_is_rejected() {
 }
 
 #[tokio::test]
+#[ignore]
 async fn invalid_password_is_rejected() {
     // Arrange
     let app = spawn_app().await;
@@ -236,30 +231,4 @@ async fn can_get_admin_newsletters() {
 
     // Assert
     assert!(html_page.contains("Submit new issue"));
-}
-
-#[tokio::test]
-async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
-    // Arrange
-    let app = spawn_app().await;
-    app.login().await;
-    create_confirmed_subscriber(&app).await;
-
-    Mock::given(path("/email"))
-        .and(method("POST"))
-        .respond_with(ResponseTemplate::new(200))
-        .expect(1)
-        .mount(&app.email_server)
-        .await;
-
-    // Act
-    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
-        ("title", "Newsletter title"),
-        ("content_text", "Newsletter body as plain text"),
-        ("content_html", "<p>Newsletter body as HTML</p>"),
-    ]);
-    let response = app.post_newsletters_admin(&newsletter_request_body).await;
-
-    // Assert
-    assert_eq!(response.status().as_u16(), 200);
 }
