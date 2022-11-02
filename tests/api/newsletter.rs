@@ -20,8 +20,8 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     // Act
     let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
         ("title", "Newsletter title"),
-        ("content_text", "Newsletter body as plain text"),
-        ("content_html", "<p>Newsletter body as HTML</p>"),
+        ("text_content", "Newsletter body as plain text"),
+        ("html_content", "<p>Newsletter body as HTML</p>"),
     ]);
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
@@ -46,8 +46,8 @@ async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
     // Act
     let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
         ("title", "Newsletter title"),
-        ("content_text", "Newsletter body as plain text"),
-        ("content_html", "<p>Newsletter body as HTML</p>"),
+        ("text_content", "Newsletter body as plain text"),
+        ("html_content", "<p>Newsletter body as HTML</p>"),
     ]);
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
@@ -63,8 +63,8 @@ async fn newsletters_returns_400_for_invalid_data() {
     let test_cases: Vec<(HashMap<&str, &str>, &str)> = vec![
         (
             HashMap::from_iter([
-                ("content_text", "Newsletter body as plain text"),
-                ("content_html", "<p>Newsletter body as HTML</p>"),
+                ("text_content", "Newsletter body as plain text"),
+                ("html_content", "<p>Newsletter body as HTML</p>"),
             ]),
             "missing title",
         ),
@@ -97,8 +97,8 @@ async fn requests_missing_authorization_are_rejected() {
         .post(&format!("{}/admin/newsletters", &app.address))
         .form(&HashMap::<&str, &str>::from_iter([
             ("title", "Newsletter title"),
-            ("content_text", "Newsletter body as plain text"),
-            ("content_html", "<p>Newsletter body as HTML</p>"),
+            ("text_content", "Newsletter body as plain text"),
+            ("html_content", "<p>Newsletter body as HTML</p>"),
         ]))
         .send()
         .await
