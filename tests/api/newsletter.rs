@@ -26,7 +26,7 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
-    assert_eq!(response.status().as_u16(), 200);
+    assert_is_redirect_to(&response, "/admin/newsletters")
 }
 
 #[tokio::test]
@@ -52,7 +52,7 @@ async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
-    assert_eq!(response.status().as_u16(), 200);
+    assert_is_redirect_to(&response, "/admin/newsletters")
 }
 
 #[tokio::test]
