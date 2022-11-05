@@ -18,11 +18,12 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
         .await;
 
     // Act
-    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
-        ("title", "Newsletter title"),
-        ("text_content", "Newsletter body as plain text"),
-        ("html_content", "<p>Newsletter body as HTML</p>"),
-    ]);
+    let newsletter_request_body = serde_json::json!({
+        "title": "Newsletter title",
+        "text_content": "Newsletter body as plain text",
+        "html_content": "<p>Newsletter body as HTML</p>",
+        "idempotency_key": uuid::Uuid::new_v4().to_string(),
+    });
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
@@ -44,11 +45,12 @@ async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
         .await;
 
     // Act
-    let newsletter_request_body: HashMap<&str, &str> = HashMap::from_iter([
-        ("title", "Newsletter title"),
-        ("text_content", "Newsletter body as plain text"),
-        ("html_content", "<p>Newsletter body as HTML</p>"),
-    ]);
+    let newsletter_request_body = serde_json::json!({
+        "title": "Newsletter title",
+        "text_content": "Newsletter body as plain text",
+        "html_content": "<p>Newsletter body as HTML</p>",
+        "idempotency_key": uuid::Uuid::new_v4().to_string(),
+    });
     let response = app.post_newsletters_admin(&newsletter_request_body).await;
 
     // Assert
