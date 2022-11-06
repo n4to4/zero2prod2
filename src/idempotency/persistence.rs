@@ -25,6 +25,9 @@ pub async fn try_processing(
     user_id: Uuid,
 ) -> anyhow::Result<NextAction> {
     let mut transaction = pool.begin().await?;
+    //sqlx::query!("set transaction isolation level repeatable read")
+    //    .execute(&mut transaction)
+    //    .await?;
     let n_inserted_rows = sqlx::query!(
         r#"
         insert into idempotency (
