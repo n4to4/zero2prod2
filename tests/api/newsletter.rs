@@ -13,7 +13,7 @@ use wiremock::{Mock, ResponseTemplate};
 async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
     // Arrange
     let app = spawn_app().await;
-    app.login().await;
+    app.test_user.login(&app).await;
     create_unconfirmed_subscriber(&app).await;
 
     Mock::given(any())
@@ -39,7 +39,7 @@ async fn newsletters_are_not_delivered_to_unconfirmed_subscribers() {
 async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
     // Arrange
     let app = spawn_app().await;
-    app.login().await;
+    app.test_user.login(&app).await;
     create_confirmed_subscriber(&app).await;
 
     Mock::given(path("/email"))
@@ -66,7 +66,7 @@ async fn newsletters_are_delivered_to_confirmed_subscribers_admin() {
 async fn newsletters_returns_400_for_invalid_data() {
     // Arrange
     let app = spawn_app().await;
-    app.login().await;
+    app.test_user.login(&app).await;
     let test_cases: Vec<(HashMap<&str, &str>, &str)> = vec![
         (
             HashMap::from_iter([
@@ -231,7 +231,7 @@ async fn you_must_be_logged_in_to_submit_a_new_issue() {
 async fn can_get_admin_newsletters() {
     // Arrange
     let app = spawn_app().await;
-    app.login().await;
+    app.test_user.login(&app).await;
 
     // Act
     let html_page = app.get_admin_newsletters_html().await;
@@ -247,8 +247,7 @@ async fn newsletter_creation_is_idempotent() {
     // Arrange
     let app = spawn_app().await;
     create_confirmed_subscriber(&app).await;
-    //app.test_user.login(&app).await;
-    app.login().await;
+    app.test_user.login(&app).await;
 
     Mock::given(path("/email"))
         .and(method("POST"))
@@ -287,7 +286,7 @@ async fn concurrent_form_submission_is_handled_gracefully() {
     // Arrange
     let app = spawn_app().await;
     create_confirmed_subscriber(&app).await;
-    app.login().await;
+    app.test_user.login(&app).await;
 
     Mock::given(path("/email"))
         .and(method("POST"))
@@ -333,7 +332,7 @@ async fn transient_errors_do_not_cause_duplicate_deliveries_on_retries() {
     // Two subscribers instead of one!
     create_confirmed_subscriber(&app).await;
     create_confirmed_subscriber(&app).await;
-    app.login().await;
+    app.test_user.login(&app).await;
 
     // Part 1 - Submit newsletter form
     // Email delivery fails for the second subscriber
