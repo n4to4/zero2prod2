@@ -141,7 +141,10 @@ impl TestApp {
         ConfirmationLinks { html, plain_text }
     }
 
-    pub async fn post_newsletters_admin<T: serde::Serialize>(&self, form: &T) -> reqwest::Response {
+    pub async fn post_publish_newsletter<T: serde::Serialize>(
+        &self,
+        form: &T,
+    ) -> reqwest::Response {
         self.api_client
             .post(&format!("{}/admin/newsletters", &self.address))
             .form(form)
