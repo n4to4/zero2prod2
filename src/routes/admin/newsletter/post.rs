@@ -25,7 +25,7 @@ struct ConfirmedSubscriber {
     skip_all,
     fields(username=tracing::field::Empty, user_id=tracing::field::Empty)
 )]
-pub async fn publish_newsletter_admin(
+pub async fn publish_newsletter(
     form: web::Form<FormData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
