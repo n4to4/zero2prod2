@@ -52,6 +52,62 @@
     },
     "query": "insert into subscription_tokens (subscription_token, subscriber_id)\n        values ($1, $2)"
   },
+  "3ff156637c34dcacc4d8792a5b8dd8a9f913f417d060da50906b7cf085ef8a09": {
+    "describe": {
+      "columns": [
+        {
+          "name": "newsletter_issue_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "subscriber_email",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        select newsletter_issue_id, subscriber_email\n        from issue_delivery_queue\n        for update\n        skip locked\n        limit 1\n        "
+  },
+  "5095660bd1c8543c891cbb4ae1f037a2764d2d2d3aa977bba85af9aa3b0c9f0d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "title",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "text_content",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "html_content",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        select title, text_content, html_content\n        from newsletter_issues\n        where\n            newsletter_issue_id = $1\n        "
+  },
   "53ac4cdb06eefd6c3d88936e0ca3577a119cc95dd443f27b5ec4b90a0c2f0cac": {
     "describe": {
       "columns": [
@@ -171,6 +227,33 @@
     },
     "query": "\n        update idempotency\n        set\n            response_status_code = $3,\n            response_headers = $4,\n            response_body = $5\n        where\n            user_id = $1 and\n            idempotency_key = $2\n        "
   },
+  "8d73e5def8a0dba788f9c2536461d34283ff1a14a03fa49f493541db5782681a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        insert into newsletter_issues (\n            newsletter_issue_id,\n            title,\n            text_content,\n            html_content,\n            published_at\n        )\n        values ($1, $2, $3, $4, now())\n        "
+  },
+  "da5f480c3f7cfc39bf746d7255821d354c6a2dc06708104c3a8e493b95b2e551": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        insert into issue_delivery_queue (\n            newsletter_issue_id,\n            subscriber_email\n        )\n        select $1, email\n        from subscriptions\n        where status = 'confirmed'\n        "
+  },
   "dfd2e5b61fab3afc00166345329b63a24c1b7267b990d522f42e3c0e73f85fea": {
     "describe": {
       "columns": [
@@ -227,22 +310,17 @@
     },
     "query": "\n        select\n          response_status_code as \"response_status_code!\",\n          response_headers as \"response_headers!: Vec<HeaderPairRecord>\",\n          response_body as \"response_body!\"\n        from idempotency\n        where\n          user_id = $1\n          and idempotency_key = $2\n        "
   },
-  "f2b2b23bf31b18525e89b3492179d205c76dedfb059458e5ea95dc538d447c51": {
+  "ecb7e802b267a5a6fab65c92024842011f6cec3ceb945556ed91567be9c0fe71": {
     "describe": {
-      "columns": [
-        {
-          "name": "email",
-          "ordinal": 0,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
       }
     },
-    "query": "\n        select email\n        from subscriptions\n        where status = 'confirmed'\n        "
+    "query": "\n        delete from issue_delivery_queue\n        where\n            newsletter_issue_id = $1 and\n            subscriber_email = $2\n        "
   }
 }
