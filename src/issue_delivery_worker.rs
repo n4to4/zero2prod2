@@ -12,25 +12,14 @@ struct NewsletterIssue {
     html_content: String,
 }
 
-enum ExecutionOutcome {
+pub enum ExecutionOutcome {
     TaskCompleted,
     EmptyQueue,
 }
 
 pub async fn run_worker_until_stopped(configuration: Settings) -> anyhow::Result<()> {
     let connection_pool = get_connection_pool(&configuration.database);
-
-    let sender_email = configuration
-        .email_client
-        .sender()
-        .expect("Invalid sender email address.");
-    let timeout = configuration.email_client.timeout();
-    let email_client = EmailClient::new(
-        configuration.email_client.base_url,
-        sender_email,
-        configuration.email_client.authorization_token,
-        timeout,
-    );
+    let email_client = configuration.email_client.client();
     worker_loop(connection_pool, email_client).await
 }
 
@@ -56,7 +45,7 @@ async fn worker_loop(pool: PgPool, email_client: EmailClient) -> anyhow::Result<
     ),
     err
 )]
-async fn try_execute_task(
+pub async fn try_execute_task(
     pool: &PgPool,
     email_client: &EmailClient,
 ) -> anyhow::Result<ExecutionOutcome> {
